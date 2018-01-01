@@ -17,6 +17,7 @@ npm-debug.log
 resources/signing
 
 # ------------ Eclipse ------------
+.project
 .metadata
 bin/
 tmp/
