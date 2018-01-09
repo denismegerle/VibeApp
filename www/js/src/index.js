@@ -233,7 +233,6 @@ function handleBLConnect(clickedIndex) {
 }
 
 function watchOrientation() {
-	
 }
 
 // sending vibration signals to bleDevice !
@@ -244,7 +243,6 @@ function sendVibration() {
 function buttonClick() {
 	// Test...
 	alert("abc");
-	/* ble.scan([], 10, foundBT, notFound) */
 }
 
 function foundBT(device) {

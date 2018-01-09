@@ -26,5 +26,6 @@
     <plugin name="cordova-plugin-ble-central" spec="^1.1.4" />
     <plugin name="cordova-plugin-compat" spec="^1.2.0" />
     <plugin name="cordova-plugin-geolocation" spec="^4.0.1" />
+    <plugin name="cordova.plugins.diagnostic" source="npm" />
     <engine name="android" spec="7.0.0" />
 </widget>
