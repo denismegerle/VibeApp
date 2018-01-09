@@ -25,3 +25,12 @@ function createBLListElement(device) {
 	
 	return li;
 }
+
+function bleVibrate() {
+	ble.isConnected(bleDevice.id, function() {
+		// connected, send vibration signals
+		sendVibration();
+	}, function() {
+		// not connected, do nothing
+	});
+}

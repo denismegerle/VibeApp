@@ -16,27 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-var deviceLocation = {
-	str: "N/A",
-	latitude: "N/A",
-	longitude: "N/A"
-};
-
-var nextWaypoint = {
-	str: "N/A",
-	latitude: "N/A",
-	longitude: "N/A",
-	dist: "N/A",
-	dir: "N/A"
-};
-
-var orientationAbsolute = {
-	alpha: "N/A",
-	beta: "N/A",
-	gamma: "N/A"
-}
-
 var gRouteLeg;
 
 var curStep = 0;
@@ -52,6 +31,7 @@ var bleDevice;
 var touchScroll = function( event ) {
     event.preventDefault();
 };
+
 var body = document.body,
 overlay = document.querySelector('.overlay');
 
@@ -129,40 +109,12 @@ function onRouteButton() {
 	});
 }
 
-function parseInputToRequest(input) {
-	if (representsCoordinates(input))
-		return input.replace(/ /g, '');
-	return input.trim().replace(/ /g, '+');
-}
-
-function setNextWaypoint(coords) {
-	if (coords.latitude === null || coords.longitude === null)
-		return;
-	nextWaypoint.str = coords.str;
-	nextWaypoint.latitude = coords.latitude;
-	nextWaypoint.longitude = coords.longitude;
-	
-	var gpos = { lat: nextWaypoint.latitude, lng: nextWaypoint.longitude };
-	marker.setMap(null);
-	marker = new google.maps.Marker({
-		position: gpos,
-	    map: map
-	});
-	map.setCenter(gpos);
-}
-
-// updates next wp except actual lat/long!
-function updateNextWaypoint() {
-	nextWaypoint.dist = airlineDistanceOf(deviceLocation.latitude, deviceLocation.longitude, nextWaypoint.latitude, nextWaypoint.longitude);
-	nextWaypoint.dir = degreeBetween(deviceLocation.latitude, deviceLocation.longitude, nextWaypoint.latitude, nextWaypoint.longitude);
-}
-
-function getFacingDir(ev) {
-	return ev.alpha;
-}
-
-function calcUserGoDirTo(facingDir, waypointDir) {
-	
+function scanButton() {
+	$('#ble-scan-button').hide();
+	scanBluetooth();
+    setTimeout(function() {
+        $('#ble-scan-button').show();
+    }, 5000);
 }
 
 var app = {
@@ -186,66 +138,31 @@ var app = {
         	window.addEventListener("compassneedscalibration", function(event) {
      	       event.preventDefault();
         	}, true);
+        	// update compass orientation data all the time...
         	window.addEventListener("deviceorientationabsolute", function(event) {
-        		// update compass orientation data all the time...
         		orientationAbsolute.alpha = event.alpha;
         		orientationAbsolute.beta = event.beta;
         		orientationAbsolute.gamma = event.gamma;
         	}, true);
-        	
+        	// fixing (extremely) low response gmaps
         	google.maps.event.addListener(map, "idle", function(){
                 google.maps.event.trigger(map, 'resize'); 
             });
         	
-        	// update variables in html
-        	setInterval(function() {
-        		document.getElementById("console-dest").innerHTML = nextWaypoint.str;
-        		document.getElementById("console-nextwpcoords").innerHTML = nextWaypoint.latitude + "," + nextWaypoint.longitude;
-        		document.getElementById("console-nextwpdir").innerHTML = nextWaypoint.dir;
-        		document.getElementById("console-nextwpdist").innerHTML = nextWaypoint.dist;
-        		updateNextWaypoint();
-        		
-        		if (countSteps) {
-        			if (nextWaypoint.dist < 50.0) {
-        				reachedNextWaypoint();
-        			}
-        		}
-        	}, 100);
+        	// update route variables in compass
+        	setInterval(updateRouteInfo, 100);
+        	
         	// update compass
-        	setInterval(function() {
-        		var compassdir = orientationAbsolute.alpha;
-         		
-        		document.getElementById("alphashow").innerHTML = Math.ceil(compassdir);
-        		var compassDisc = document.getElementById("compassdisc");
-     	      	compassDisc.style.webkitTransform = "rotate("+ compassdir +"deg)";
-     	      	compassDisc.style.MozTransform = "rotate("+ compassdir +"deg)";
-     	      	compassDisc.style.transform = "rotate("+ compassdir +"deg)";
-     	      	
-     	      	
-     	      	var waypointDisc = document.getElementById("waypointsign-circle");
-     	      	var correctionOffset = 45.0;
-     	      	var userGoDir = correctionOffset + orientationAbsolute.alpha - nextWaypoint.dir;
-     	      	waypointDisc.style.webkitTransform = "rotate("+ userGoDir +"deg)";
-     	      	waypointDisc.style.MozTransform = "rotate("+ userGoDir +"deg)";
-     	      	waypointDisc.style.transform = "rotate("+ userGoDir +"deg)";
-        	}, 50);
-        	// check if still connected with ble device
-        	setInterval(function() {
-        		ble.isConnected(bleDevice.id, function() {
-        			// connected, send vibration signals
-        			sendVibration();
-        		}, function() {
-        			// not connected, do nothing
-        		})
-        	}, 500);
+        	setInterval(updateCompass, 50);
+        	
+        	// update waypoint on compass
+        	setInterval(updateWaypointSign, 50);
+        	
+        	// if connected with ble, vibrate accordingly
+        	setInterval(bleVibrate, 1000);
+  
         	// update home html
-        	setInterval(function() {
-        		document.getElementById("statusmsg-internet").innerHTML = internetStatus();
-        		document.getElementById("statusmsg-bluetooth").innerHTML = bluetoothStatus();
-        		document.getElementById("statusmsg-geo").innerHTML = geolocationStatus();
-        		document.getElementById("statusmsg-map").innerHTML = gmapsStatus(map);
-        		document.getElementById("statusmsg-connected").innerHTML = bleStatus(bleDevice);
-        	}, 2000);
+        	setInterval(homeStatusUpdate, 2000);
         }, false);
     },
     // deviceready Event Handler
@@ -267,27 +184,6 @@ var app = {
         console.log('Received Event: ' + id);
     }
 };
-
-function reachedNextWaypoint() {
-	if (curStep + 1 < gRouteLeg.steps.length) {
-		curStep++;
-		var coords = new Object();
-		coords.str = gRouteLeg.steps[curStep].html_instructions;
-		coords.latitude = gRouteLeg.steps[curStep].end_location.lat;
-		coords.longitude = gRouteLeg.steps[curStep].end_location.lng;
-		setNextWaypoint(coords);
-		
-		// make green for a few secs or vibrate bluetooth device
-	}
-}
-
-function scanButton() {
-	$('#ble-scan-button').hide();
-	scanBluetooth();
-    setTimeout(function() {
-        $('#ble-scan-button').show();
-    }, 5000);
-}
 
 function scanBluetooth() {
 	$('#ble-devices-list').empty();

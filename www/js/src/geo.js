@@ -61,6 +61,12 @@ function parseCoordinateText(input) {
 	return coords;
 }
 
+function parseInputToRequest(input) {
+	if (representsCoordinates(input))
+		return input.replace(/ /g, '');
+	return input.trim().replace(/ /g, '+');
+}
+
 function createDirectionsRequest(deviceLocation) {
 	var input = String(document.getElementById("waypointInput").value),
 		gmapsUrl = "https://maps.googleapis.com/maps/api/directions/",

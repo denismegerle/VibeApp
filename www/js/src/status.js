@@ -42,3 +42,11 @@ function bleStatus(bleDevice) {
 	ble.isConnected(bleDevice.id, function() {stati.bleConnected = true}, function() {stati.bleConnected = false});
 	return stati.bleConnected;
 }
+
+function homeStatusUpdate() {
+	document.getElementById("statusmsg-internet").innerHTML = internetStatus();
+	document.getElementById("statusmsg-bluetooth").innerHTML = bluetoothStatus();
+	document.getElementById("statusmsg-geo").innerHTML = geolocationStatus();
+	document.getElementById("statusmsg-map").innerHTML = gmapsStatus(map);
+	document.getElementById("statusmsg-connected").innerHTML = bleStatus(bleDevice);
+}

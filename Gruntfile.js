@@ -7,7 +7,7 @@ module.exports = function(grunt) {
     	      separator: ';\n\n',
     	    },
     	    dist: {
-    	      src: ['www/js/src/index.js', 'www/js/src/geo.js', 'www/js/src/ble.js', 'www/js/src/status.js'],
+    	      src: ['www/js/src/index.js', 'www/js/src/geo.js', 'www/js/src/ble.js', 'www/js/src/status.js', 'www/js/src/compass.js'],
     	      dest: 'www/js/main.js',
     	    },
     	  },
