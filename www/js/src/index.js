@@ -23,7 +23,8 @@ var curStep = 0;
 var countSteps = false;
 
 var map; // gmaps map
-var marker; // gmaps marker
+var waypointMarker; // gmaps marker
+var userMarker;
 
 var bleList = [];
 var bleDevice;
@@ -64,14 +65,19 @@ $( document ).on( "pageinit", "#home-page", function() {
 });
 
 function initMap() {
-    var uluru = {lat: -25.363, lng: 131.044};
+    var ka = {lat: 49.006, lng: 8.403};
     map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 6,
-      center: uluru
+      zoom: 9,
+      center: ka
     });
-    marker = new google.maps.Marker({
-      position: uluru,
+    waypointMarker = new google.maps.Marker({
+      position: ka,
       map: map
+    });
+    userMarker = new google.maps.Marker({
+        position: ka,
+        map: map,
+        icon: 'http://www.robotwoods.com/dev/misc/bluecircle.png'
     });
   }
 
@@ -118,14 +124,9 @@ function scanButton() {
 }
 
 var app = {
-    // Application Constructor
     initialize: function() {
         this.bindEvents();
     },
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
         document.addEventListener('deviceready', function() {
         	// update location all the time...
@@ -146,7 +147,7 @@ var app = {
         	}, true);
         	// fixing (extremely) low response gmaps
         	google.maps.event.addListener(map, "idle", function(){
-                google.maps.event.trigger(map, 'resize'); 
+                google.maps.event.trigger(map, 'resize');
             });
         	
         	// update route variables in compass
@@ -163,12 +164,11 @@ var app = {
   
         	// update home html
         	setInterval(homeStatusUpdate, 2000);
+        	
+        	// update map
+        	setInterval(updateGmap, 500);
         }, false);
     },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
     	app.receivedEvent('deviceready');
     },
@@ -184,6 +184,14 @@ var app = {
         console.log('Received Event: ' + id);
     }
 };
+
+function updateGmap() {
+	var gposWaypoint = { lat: nextWaypoint.latitude, lng: nextWaypoint.longitude };
+	waypointMarker.setPosition(gposWaypoint);
+	
+	var gposUser = { lat: deviceLocation.latitude, lng: deviceLocation.longitude };
+	userMarker.setPosition(gposUser);
+}
 
 function scanBluetooth() {
 	$('#ble-devices-list').empty();
@@ -232,7 +240,7 @@ function handleBLConnect(clickedIndex) {
 	});
 }
 
-function watchOrientation() {
+function debug() {
 }
 
 // sending vibration signals to bleDevice !

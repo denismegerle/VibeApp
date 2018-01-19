@@ -24,14 +24,6 @@ function setNextWaypoint(coords) {
 	nextWaypoint.str = coords.str;
 	nextWaypoint.latitude = coords.latitude;
 	nextWaypoint.longitude = coords.longitude;
-	
-	var gpos = { lat: nextWaypoint.latitude, lng: nextWaypoint.longitude };
-	marker.setMap(null);
-	marker = new google.maps.Marker({
-		position: gpos,
-	    map: map
-	});
-	map.setCenter(gpos);
 }
 
 //updates next wp except actual lat/long!
@@ -65,7 +57,6 @@ function updateWaypointSign() {
 function updateCompass() {
 	var compassdir = orientationAbsolute.alpha;
 	
-	document.getElementById("alphashow").innerHTML = Math.ceil(compassdir);
 	var compassDisc = document.getElementById("compassdisc");
       	compassDisc.style.webkitTransform = "rotate("+ compassdir +"deg)";
       	compassDisc.style.MozTransform = "rotate("+ compassdir +"deg)";
