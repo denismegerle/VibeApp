@@ -69,9 +69,8 @@
 	<!-- ********** HOME  PAGE! ********** -->
 	<div id="home-page" data-url="home-page" data-role="page" data-theme="a" class="background-content">
     	<div data-role="header" data-theme="b" data-position="fixed">
-        	<h1></h1>
-        	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false">Open left panel</a>
-        	<a class="ui-icon-nodisc" href="#right-panel" data-iconpos="notext" data-icon="arrow-l" data-theme="d" data-iconshadow="false" data-shadow="false">Open right panel</a>
+        	<h1>Welcome to Vibe!</h1>
+        	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false"></a>
     	</div>
     	
     	<div data-role="content" data-position="fixed" class="home-stati">
@@ -100,7 +99,7 @@
           <h4><span id="statusmsg-connection">false</span></h4>
         </div>
         
-		<button id="getOrientation" onclick="watchOrientation()">GET ORIENTATION</button>
+		<button id="debugButton" onclick="debug()">DEBUG Button</button>
 		
     	</div>
     </div>
@@ -108,10 +107,9 @@
 	
 	<!-- ********** MAP   PAGE! ********** -->
 	<div id="map-page" data-url="map-page" data-role="page" data-theme="a" class="background-content">
-    	<div data-role="header" data-theme="b" data-position="fixed">
-        	<h1>Swipe left or right</h1>
-        	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false">Open left panel</a>
-        	<a class="ui-icon-nodisc" href="#right-panel" data-iconpos="notext" data-icon="arrow-l" data-theme="d" data-iconshadow="false" data-shadow="false">Open right panel</a>
+    	<div data-role="header" data-theme="a" data-position="fixed">
+        	<h1>Map</h1>
+        	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false"></a>
     	</div>
     	
     	<div id="map"></div>
@@ -122,9 +120,8 @@
 	<!-- ********** COMP  PAGE! ********** -->
 	<div id="comp-page" data-url="comp-page" data-role="page" data-theme="a" class="background-content">
     	<div data-role="header" data-theme="b" data-position="fixed">
-        	<h1>Swipe left or right</h1>
+        	<h1>Compass</h1>
         	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false">Open left panel</a>
-        	<a class="ui-icon-nodisc" href="#right-panel" data-iconpos="notext" data-icon="arrow-l" data-theme="d" data-iconshadow="false" data-shadow="false">Open right panel</a>
     	</div>
     	
     	<div class="compass">
@@ -138,10 +135,6 @@
     				<div id="west" class="west">W</div>
     			</div>
     		</div>
-    	</div>
-    	
-    	<div class="orientation-data">	
-    		<div>Alpha<span id="alphashow"></span></div>
     	</div>
     	
     	<div class="waypoint-data">
@@ -161,9 +154,8 @@
 	<!-- ********** CONN  PAGE! ********** -->
 	<div id="conn-page" data-url="conn-page" data-role="page" data-theme="a" class="background-content">
     	<div data-role="header" data-theme="b" data-position="fixed">
-        	<h1>Swipe left or right</h1>
+        	<h1>Bluetooth</h1>
         	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false">Open left panel</a>
-        	<a class="ui-icon-nodisc" href="#right-panel" data-iconpos="notext" data-icon="arrow-l" data-theme="d" data-iconshadow="false" data-shadow="false">Open right panel</a>
     	</div>
     	
     	<div data-role="content" data-position="fixed">
