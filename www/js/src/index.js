@@ -91,6 +91,11 @@ function onWaypointButton() {
 		alert("No coordinates in textfield...");
 		return;
 	}
+	
+	if (!stati.geolocation) {
+		alert("Your position is needed to calculate your path!");
+		return;
+	}
 		
 	var coords = parseCoordinateText(input);
 	setNextWaypoint(coords);
@@ -100,6 +105,16 @@ function onRouteButton() {
 	curStep = 0;
 	countSteps = true;
 	var request = createDirectionsRequest(deviceLocation);
+	
+	if (!stati.internet) {
+		alert("No internet. It is needed to retrieve your route!");
+		return;
+	}
+	
+	if (!stati.geolocation) {
+		alert("Geolocation turned off. Your position is needed to calculate your path!");
+		return;
+	}
 	
 	alert(request);
 	
@@ -163,7 +178,7 @@ var app = {
         	setInterval(bleVibrate, 1000);
   
         	// update home html
-        	setInterval(homeStatusUpdate, 2000);
+        	setInterval(homeStatusUpdate, 500);
         	
         	// update map
         	setInterval(updateGmap, 500);

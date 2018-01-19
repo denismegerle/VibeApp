@@ -71,7 +71,7 @@ function updateRouteInfo() {
 	updateNextWaypoint();
 	
 	if (countSteps) {
-		if (nextWaypoint.dist < 50.0) {
+		if (nextWaypoint.dist < 10.0) {
 			reachedNextWaypoint();
 		}
 	}
