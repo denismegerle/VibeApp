@@ -1,13 +1,35 @@
+/**
+ * Converting value to radians.
+ * 
+ * @param {number} value to convert in degrees
+ * @returns {number} value in radians
+ */
 function toRad(value) {
     return value * Math.PI / 180;
 }
 
+/**
+ * Converting value to degrees.
+ * 
+ * @param {number} value to convert in radians
+ * @returns {number} value in degrees
+ */
 function toDeg(value) {
 	return value * 180 / Math.PI;
 }
 
+/**
+ * Calculates the airline distance from point 1 (lat1, long1) to
+ * point 2 (lat2, long2).
+ * 
+ * @param {number} lat1 latitude of point 1
+ * @param {number} long1 longitude of point 1
+ * @param {number} lat2 latitude of point 2
+ * @param {number} long2 longitude of point 2
+ * @returns {number} airline distance in meters
+ */
 function airlineDistanceOf(lat1, long1, lat2, long2) {
-	var R = 6371e3; // metres
+	var eR = 6371e3; 					// earth radius in m
 	var φ1 = toRad(lat1);
 	var φ2 = toRad(lat2);
 	var Δφ = toRad(lat2 - lat1);
@@ -18,11 +40,20 @@ function airlineDistanceOf(lat1, long1, lat2, long2) {
 	        Math.sin(Δλ/2) * Math.sin(Δλ/2);
 	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-	var d = R * c;
+	var d = eR * c;
 	
 	return d;
 }
 
+/**
+ * Calculates the degree to walk on a round earth to reach point 2 from point 1.
+ * 
+ * @param {number} lat1 latitude of point 1
+ * @param {number} long1 longitude of point 1
+ * @param {number} lat2 latitude of point 2
+ * @param {number} long2 longitude of point 2
+ * @returns {number} degree point 1 to point 2 on a sphere
+ */
 function degreeBetween(lat1, long1, lat2, long2) {
 	var φ1 = toRad(lat1);
 	var φ2 = toRad(lat2);
@@ -37,10 +68,16 @@ function degreeBetween(lat1, long1, lat2, long2) {
 
     brng = toDeg(brng);
     brng = (brng + 360) % 360;
-    brng = 360 - brng; // count degrees counter-clockwise - remove to make clockwise
+    brng = 360 - brng;
     return brng;
 }
 
+/**
+ * Simply checking a string against regex to check for coordinates
+ * 
+ * @param {string} input any string
+ * @returns {boolean} whether the input are coordinates in lat long or not
+ */
 function representsCoordinates(input) {
 	var regexCoords = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 	var regexMatch = input.match(regexCoords);
@@ -50,6 +87,12 @@ function representsCoordinates(input) {
 	return false;
 }
 
+/**
+ * Parsing coordinates when they are in the correct format.
+ * 
+ * @param {string} input coordinates in the format lat, long
+ * @returns {Object} coords containing latitude, longitude and str representation
+ */
 function parseCoordinateText(input) {
 	var strCoords = input.split(',');
 	var coords = new Object();
@@ -61,18 +104,31 @@ function parseCoordinateText(input) {
 	return coords;
 }
 
+/**
+ * Parsing an input to a webrequest, replacing ' ' with '+' for HTML.
+ * 
+ * @param {string} input the search term
+ * @returns {string} a representation of the search term to be used in web requests
+ */
 function parseInputToRequest(input) {
 	if (representsCoordinates(input))
 		return input.replace(/ /g, '');
 	return input.trim().replace(/ /g, '+');
 }
 
-function createDirectionsRequest(deviceLocation) {
-	var input = String(document.getElementById("waypointInput").value),
-		gmapsUrl = "https://maps.googleapis.com/maps/api/directions/",
+/**
+ * Creating a google directions request to retrieve the json containing the
+ * route to a destination.
+ * 
+ * @param {string} deviceLocation the current device location
+ * @param {string} destination the destintion of the route to be retrieved
+ * @returns {string} the g directions request url matching location and dest
+ */
+function createDirectionsRequest(deviceLocation, destination) {
+	var gmapsUrl = "https://maps.googleapis.com/maps/api/directions/",
 		outputFormat = "json?";
 		origin = "origin=" + deviceLocation.latitude + "," + deviceLocation.longitude,
-		destination = "destination=" + parseInputToRequest(input),
+		destination = "destination=" + destination,
 		apikey = "key=" + "AIzaSyBsgaNK6czEQ-n3O0jLIPdcoy_8qsNGUhI",
 		parameters = origin + "&" + destination + "&" + apikey;
 	

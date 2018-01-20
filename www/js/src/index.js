@@ -104,7 +104,8 @@ function onWaypointButton() {
 function onRouteButton() {
 	curStep = 0;
 	countSteps = true;
-	var request = createDirectionsRequest(deviceLocation);
+	var input = String(document.getElementById("waypointInput").value);
+	var request = createDirectionsRequest(deviceLocation, parseInputToRequest(input));
 	
 	if (!stati.internet) {
 		alert("No internet. It is needed to retrieve your route!");

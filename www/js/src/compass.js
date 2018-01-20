@@ -18,6 +18,26 @@ var orientationAbsolute = {
 	gamma: "N/A"
 };
 
+/**
+ * Offset to correct orientation of the next waypoint sign.
+ */
+var correctionOffset = 45.0;
+
+/**
+ * Offset to correct the user phones orientation.
+ */
+var phoneModeOffset = 0.0;
+
+/**
+ * Distance in meters in which the waypoint is defined as reached.
+ */
+var reachDistance = 10.0;
+
+/**
+ * Setting the next waypoint to given coordinates globally.
+ * 
+ * @param {Object} coords containing latitude and longitude, str representation possible
+ */
 function setNextWaypoint(coords) {
 	if (coords.latitude === null || coords.longitude === null)
 		return;
@@ -26,12 +46,20 @@ function setNextWaypoint(coords) {
 	nextWaypoint.longitude = coords.longitude;
 }
 
-//updates next wp except actual lat/long!
+/**
+ * Updates the distance and direction to the next waypoint according to eliptic 
+ * mathematics.
+ */
 function updateNextWaypoint() {
 	nextWaypoint.dist = airlineDistanceOf(deviceLocation.latitude, deviceLocation.longitude, nextWaypoint.latitude, nextWaypoint.longitude);
 	nextWaypoint.dir = degreeBetween(deviceLocation.latitude, deviceLocation.longitude, nextWaypoint.latitude, nextWaypoint.longitude);
 }
 
+/**
+ * Function is called when the next waypoint is reached. It updates the next
+ * waypoint to the next waypoint in the given route.
+ * Also gives haptic feedback if goal or next waypoint is reached.
+ */
 function reachedNextWaypoint() {
 	if (curStep + 1 < gRouteLeg.steps.length) {
 		curStep++;
@@ -41,21 +69,28 @@ function reachedNextWaypoint() {
 		coords.longitude = gRouteLeg.steps[curStep].end_location.lng;
 		setNextWaypoint(coords);
 		
-		// make green for a few secs or vibrate bluetooth device
+		// TODO: haptic feedback if goal / nextwaypoint is reached
 	}
 }
 
+/**
+ * Updating the waypoint sign in the gui to point to the next waypoint location.
+ */
 function updateWaypointSign() {
    	var waypointDisc = document.getElementById("waypointsign-circle");
-   	var correctionOffset = 45.0;
    	var userGoDir = correctionOffset + orientationAbsolute.alpha - nextWaypoint.dir;
+   	
    	waypointDisc.style.webkitTransform = "rotate("+ userGoDir +"deg)";
    	waypointDisc.style.MozTransform = "rotate("+ userGoDir +"deg)";
    	waypointDisc.style.transform = "rotate("+ userGoDir +"deg)";
 }
 
+/**
+ * Updating the compass disc to rotate according to north and the current phone
+ * mode (landscape / portrait)
+ */
 function updateCompass() {
-	var compassdir = orientationAbsolute.alpha;
+	var compassdir = orientationAbsolute.alpha + phoneModeOffset;
 	
 	var compassDisc = document.getElementById("compassdisc");
       	compassDisc.style.webkitTransform = "rotate("+ compassdir +"deg)";
@@ -63,6 +98,11 @@ function updateCompass() {
       	compassDisc.style.transform = "rotate("+ compassdir +"deg)";
 }
 
+/**
+ * Updates the route information in the DOM. Also checks if next waypoint of the
+ * route is already reached, in which case the reachedNextWaypoint method is 
+ * called.
+ */
 function updateRouteInfo() {
 	document.getElementById("console-dest").innerHTML = nextWaypoint.str;
 	document.getElementById("console-nextwpcoords").innerHTML = nextWaypoint.latitude + "," + nextWaypoint.longitude;
@@ -71,7 +111,7 @@ function updateRouteInfo() {
 	updateNextWaypoint();
 	
 	if (countSteps) {
-		if (nextWaypoint.dist < 10.0) {
+		if (nextWaypoint.dist < reachDistance) {
 			reachedNextWaypoint();
 		}
 	}
