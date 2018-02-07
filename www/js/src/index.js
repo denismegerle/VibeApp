@@ -209,13 +209,19 @@ function updateGmap() {
 	userMarker.setPosition(gposUser);
 }
 
+function isDeviceCompatible(device) {
+	if (device.name)
+		return device.name.toUpperCase().indexOf("TECO WEARABLE") !== -1;
+	return false;
+}
+
 function scanBluetooth() {
 	$('#ble-devices-list').empty();
 	bleList = [];
 	
 	ble.isEnabled(function success() {
 		ble.scan([], 5, function(device) {
-			device.compatible = true;	// TODO TEST HERE!
+			device.compatible = isDeviceCompatible(device);
 			bleList.push(device);
 			
 			document.getElementById("ble-devices-list").appendChild(createBLListElement(device));

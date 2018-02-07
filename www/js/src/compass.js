@@ -18,6 +18,8 @@ var orientationAbsolute = {
 	gamma: "N/A"
 };
 
+var userGoDir = 0.0;
+
 /**
  * Offset to correct orientation of the next waypoint sign.
  */
@@ -78,7 +80,7 @@ function reachedNextWaypoint() {
  */
 function updateWaypointSign() {
    	var waypointDisc = document.getElementById("waypointsign-circle");
-   	var userGoDir = correctionOffset + orientationAbsolute.alpha - nextWaypoint.dir;
+   	userGoDir = correctionOffset + orientationAbsolute.alpha - nextWaypoint.dir;
    	
    	waypointDisc.style.webkitTransform = "rotate("+ userGoDir +"deg)";
    	waypointDisc.style.MozTransform = "rotate("+ userGoDir +"deg)";
