@@ -33,11 +33,9 @@ function createBLListElement(device) {
 }
 
 function bleVibrate() {
-	prepareData(10);
-	alert(data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4]);
 	ble.isConnected(bleDevice.id, function() {
 		// connected, send vibration signals
-		//updateDataBuffer();
+		prepareData(userGoDir);
 		
 		ble.writeWithoutResponse(bleDevice.id, VIB_SERVICE, VIB_CHARACTERISTIC, data.buffer, writeDone, writeFailure);
 	}, function() {
@@ -58,8 +56,6 @@ function updateDataBuffer() {
 	data[2] = 0x00;
 	data[3] = 0x00;
 	data[4] = 0x00;
-	
-	var pd = projectDir(0);
 	
 	// links ist 318, im Uhrzeigersinn nehmen die Zahlen zu, ab und zu minus!
 }
@@ -83,7 +79,10 @@ function prepareData(dir) {
 }
 
 function getDistanceScale(distance) {
-	return 2.0;
+	if (distance < 0) return 1.0;
+	if (distance > 100) return 0.6;
+	
+	return (- 3 * 1000) * distance + 1.0; 
 }
 
 function getBoundary(positionNumber, side) {

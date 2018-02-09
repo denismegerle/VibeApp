@@ -80,11 +80,13 @@ function reachedNextWaypoint() {
  */
 function updateWaypointSign() {
    	var waypointDisc = document.getElementById("waypointsign-circle");
-   	userGoDir = correctionOffset + orientationAbsolute.alpha - nextWaypoint.dir;
+   	userGoDir = mod(nextWaypoint.dir - orientationAbsolute.alpha, 360);
    	
-   	waypointDisc.style.webkitTransform = "rotate("+ userGoDir +"deg)";
-   	waypointDisc.style.MozTransform = "rotate("+ userGoDir +"deg)";
-   	waypointDisc.style.transform = "rotate("+ userGoDir +"deg)";
+   	discDir = 360 - (userGoDir - correctionOffset);
+   	
+   	waypointDisc.style.webkitTransform = "rotate("+ discDir +"deg)";
+   	waypointDisc.style.MozTransform = "rotate("+ discDir +"deg)";
+   	waypointDisc.style.transform = "rotate("+ discDir +"deg)";
 }
 
 /**
