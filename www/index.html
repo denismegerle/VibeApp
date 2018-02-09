@@ -45,7 +45,7 @@
 	
 	<script type="text/javascript" src="cordova.js"></script>
 	<script type="text/javascript" src="js/jquery-1.11.1.min.js" id="cordova-jquery"></script>
-	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCl8I_p4nwHLob5Urz1yVIwuvrU6jei1tQ&callback=initMap"></script>
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=<MAPS_KEY>&callback=initMap"></script>
 	<script type="text/javascript" id="jqm-trans-disable">
 		/* For having a faster transition */
 		$(document).on("mobileinit", function() {
@@ -162,7 +162,7 @@
         <ul id="ble-devices-list" data-role="listview" data-inset="true"></ul>
         
         <div>
-        <div id="ble-scan-button" class="roundbutton" data-role="button" onclick="scanButton()"></div>
+        <div id="ble-scan-button" class="roundbutton" data-role="button" onclick="onScanButton()"></div>
         
         <div class="spinner">
           <div class="double-bounce1"></div>

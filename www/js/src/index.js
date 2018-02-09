@@ -16,29 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var gRouteLeg;
 
-var curStep = 0;
+/** Controllable intervals and interval times used in functions */
+var routeInfoInterval;
+var waypointSignInterval;
+var bleVibrateInterval;
 
-var countSteps = false;
+var ROUTEINFO_TIME = 100;
+var WAYPOINTSIGN_TIME = 50;
+var BLEVIBRATE_TIME = 1000;
+var HOMESTATUS_TIME = 500;
+var UPDATECOMPASS_TIME = 50;
+var UPDATEGMAP_TIME = 500;
 
-var map; // gmaps map
-var waypointMarker; // gmaps marker
-var userMarker;
-
-var bleList = [];
-var bleDevice;
-
+//various init stuff...
 var touchScroll = function( event ) {
     event.preventDefault();
 };
 
-var body = document.body,
-overlay = document.querySelector('.overlay');
-
 $( document ).on( "pageinit", "#home-page", function() {
 	$("#left-panel").panel().enhanceWithin();	// init global panel before start
-	$("#overlay").hide();		// hide the overlay at start
+	$("#overlay").hide();						// hide the overlay at start
 	
 	// open left panel by swiping
     $( document ).on( "swipeleft swiperight", "#home-page,#map-page,#conn-page,#comp-page", function( e ) {
@@ -64,63 +62,67 @@ $( document ).on( "pageinit", "#home-page", function() {
     });
 });
 
-function initMap() {
-    var ka = {lat: 49.006, lng: 8.403};
-    map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 9,
-      center: ka
-    });
-    waypointMarker = new google.maps.Marker({
-      position: ka,
-      map: map
-    });
-    userMarker = new google.maps.Marker({
-        position: ka,
-        map: map,
-        icon: 'http://www.robotwoods.com/dev/misc/bluecircle.png'
-    });
-  }
-
+/**
+ * Turns position of textfield into usable variables, then calculates a path
+ * and updates compass sign accordingly.
+ */
 function onWaypointButton() {
-	curStep = 0;
-	countSteps = false;
+	// ... and location is turned on. Rest not necessary
+	if (!stati.geolocation) {
+		alert("Your position is needed to calculate your path!");
+		return;
+	}
+	
 	var input = String(document.getElementById("waypointInput").value);
 	
-	// check if input are coordinates
+	// check if input are coordinates...
 	if (!representsCoordinates(input)) {
 		alert("No coordinates in textfield...");
 		return;
 	}
 	
-	if (!stati.geolocation) {
-		alert("Your position is needed to calculate your path!");
-		return;
-	}
-		
-	var coords = parseCoordinateText(input);
-	setNextWaypoint(coords);
+	curStep = 0;
+	countSteps = false;
+	
+	setNextWaypoint(parseCoordinateText(input));
+	startNavIntervals();
 }
 
+/**
+ * Checks for all its needs in establishing a connection with gmaps directions
+ * api, then retrieves the first route possible from the device location to the 
+ * destination. If one is found, saves the path globally and starts routing.
+ */
 function onRouteButton() {
-	curStep = 0;
-	countSteps = true;
-	var input = String(document.getElementById("waypointInput").value);
-	var request = createDirectionsRequest(deviceLocation, parseInputToRequest(input));
-	
 	if (!stati.internet) {
 		alert("No internet. It is needed to retrieve your route!");
 		return;
 	}
 	
 	if (!stati.geolocation) {
-		alert("Geolocation turned off. Your position is needed to calculate your path!");
+		alert("Geolocation turned off or not precise enough. Your position is needed to calculate your path!");
 		return;
 	}
 	
-	alert(request);
+	var input = String(document.getElementById("waypointInput").value);
+	var request = createDirectionsRequest(deviceLocation, parseInputToRequest(input));
+	
+	alert(request);	// TODO REMOVE, debug info
 	
 	$.getJSON(request, function(data) {
+		if (!data || !data.route) return;
+		if (data.status == "NOT_FOUND" || data.status == "ZERO_RESULTS") {
+			alert("Route could not be found or zero results.");
+			return;
+		};
+		if (!data.routes[0] || !data.routes[0].legs[0]) return;
+		
+		// just randomly picking the first available route for simplicity
 		gRouteLeg = data.routes[0].legs[0];
+		
+		// data correct, start with the first waypoint now...
+		curStep = 0;
+		countSteps = true;
 		
 		var coords = new Object();
 		coords.str = gRouteLeg.steps[0].html_instructions;
@@ -128,15 +130,35 @@ function onRouteButton() {
 		coords.longitude = gRouteLeg.steps[0].end_location.lng;
 		
 		setNextWaypoint(coords);
+		startNavIntervals();
 	});
 }
 
-function scanButton() {
+
+
+
+
+// TODO next... -> if scan not possible then also dont hide the button...
+function onScanButton() {
 	$('#ble-scan-button').hide();
 	scanBluetooth();
     setTimeout(function() {
         $('#ble-scan-button').show();
     }, 5000);
+}
+
+function startNavIntervals() {
+	// update route variables in compass
+	if (routeInfoInterval) clearInterval(routeInfoInterval);
+	routeInfoInterval = setInterval(updateRouteInfo, ROUTEINFO_TIME);
+	
+	// update waypoint on compass
+	if (waypointSignInterval) clearInterval(waypointSignInterval);
+	waypointSignInterval = setInterval(updateWaypointSign, WAYPOINTSIGN_TIME);
+	
+	// if connected with ble, vibrate accordingly
+	if (bleVibrateInterval) clearInterval(bleVibrateInterval);
+	bleVibrateInterval = setInterval(bleVibrate, BLEVIBRATE_TIME);
 }
 
 var app = {
@@ -166,23 +188,10 @@ var app = {
                 google.maps.event.trigger(map, 'resize');
             });
         	
-        	// update route variables in compass
-        	setInterval(updateRouteInfo, 100);
-        	
-        	// update compass
-        	setInterval(updateCompass, 50);
-        	
-        	// update waypoint on compass
-        	setInterval(updateWaypointSign, 50);
-        	
-        	// if connected with ble, vibrate accordingly
-        	setInterval(bleVibrate, 1000);
-  
-        	// update home html
-        	setInterval(homeStatusUpdate, 500);
-        	
-        	// update map
-        	setInterval(updateGmap, 500);
+        	// update home html, compass and gmaps, no need to save
+        	setInterval(homeStatusUpdate, HOMESTATUS_TIME);
+        	setInterval(updateCompass, UPDATECOMPASS_TIME);
+        	setInterval(updateGmap, UPDATEGMAP_TIME);
         }, false);
     },
     onDeviceReady: function() {
@@ -201,84 +210,22 @@ var app = {
     }
 };
 
-function updateGmap() {
-	var gposWaypoint = { lat: nextWaypoint.latitude, lng: nextWaypoint.longitude };
-	waypointMarker.setPosition(gposWaypoint);
-	
-	var gposUser = { lat: deviceLocation.latitude, lng: deviceLocation.longitude };
-	userMarker.setPosition(gposUser);
-}
+/**
+ * Calculates a % b correctly, this is not the remainder.
+ * 
+ * @param a {number}
+ * @param b {number}
+ * @returns {number} a % b
+ */
+function mod(a, b) { return ((a % b) + b) % b; }
 
-function isDeviceCompatible(device) {
-	if (device.name)
-		return device.name.toUpperCase().indexOf("TECO WEARABLE") !== -1;
-	return false;
-}
+/**
+ * Checks whether n is a number and not NaN.
+ * 
+ * @param n {Object} to check
+ * @returns {bool} whether it is a number or not
+ */
+function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
 
-function scanBluetooth() {
-	$('#ble-devices-list').empty();
-	bleList = [];
-	
-	ble.isEnabled(function success() {
-		ble.scan([], 5, function(device) {
-			device.compatible = isDeviceCompatible(device);
-			bleList.push(device);
-			
-			document.getElementById("ble-devices-list").appendChild(createBLListElement(device));
-			// $('#ble-devices-list').append(li);
-		}, false);
-	}, function failure() {
-		alert("Enable bluetooth!");
-	});
-}
-
-function handleBLConnect(clickedIndex) {
-	var select = $('#ble-devices-list').children()[clickedIndex];
-	
-	var conDevice = bleList[clickedIndex];
-	
-	ble.isConnected(conDevice.id, function success() {
-		// already connected, then disconnect...
-		ble.disconnect(conDevice.id, function success() {
-			// revoking style changes
-			select.removeChild(select.lastChild);
-		}, function failure() {
-			alert("Could not disconnect... Retry!");
-		})
-	}, function failure() {
-		// not connected, then connect to the device if its compatible!
-		ble.connect(conDevice.id, function success(device) {
-			// now connected to device, style changes to node
-			var connectedMessage = document.createElement("p");
-			connectedMessage.appendChild(document.createTextNode("CONNECTED!"));
-
-			select.appendChild(connectedMessage);
-			// TODO -> CONNECT TO DEVICE !!!
-			bleDevice = conDevice;
-		}, function failure() {
-			// connection failure
-			alert("Could not connect to device!");
-		})
-	});
-}
-
-function debug() {
-}
-
-// sending vibration signals to bleDevice !
-function sendVibration() {
-	
-}
-
-function buttonClick() {
-	// Test...
-	alert("abc");
-}
-
-function foundBT(device) {
-	alert(device.name)
-}
-
-function notFound() {
-	alert("nothin found")
-}
+// TEST BUTTON...
+function debug() {}

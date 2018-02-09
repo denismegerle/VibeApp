@@ -18,6 +18,9 @@ var orientationAbsolute = {
 	gamma: "N/A"
 };
 
+var curStep = 0;
+var countSteps = false;
+
 var userGoDir = 0.0;
 
 /**

@@ -1,3 +1,9 @@
+var map; // gmaps map
+var waypointMarker; // gmaps marker
+var userMarker;
+
+var gRouteLeg;
+
 /**
  * Converting value to radians.
  * 
@@ -129,8 +135,34 @@ function createDirectionsRequest(deviceLocation, destination) {
 		outputFormat = "json?";
 		origin = "origin=" + deviceLocation.latitude + "," + deviceLocation.longitude,
 		destination = "destination=" + destination,
-		apikey = "key=" + "AIzaSyBsgaNK6czEQ-n3O0jLIPdcoy_8qsNGUhI",
-		parameters = origin + "&" + destination + "&" + apikey;
+		apikey = "key=" + "<DIRECTIONS_KEY>",
+		optional = "mode=" + "walking";
+		parameters = origin + "&" + destination + "&" + apikey + "&" + optional;
 	
 	return gmapsUrl + outputFormat + parameters;
+}
+
+function updateGmap() {
+	var gposWaypoint = { lat: nextWaypoint.latitude, lng: nextWaypoint.longitude };
+	waypointMarker.setPosition(gposWaypoint);
+	
+	var gposUser = { lat: deviceLocation.latitude, lng: deviceLocation.longitude };
+	userMarker.setPosition(gposUser);
+}
+
+function initMap() {
+    var ka = {lat: 49.006, lng: 8.403};
+    map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 9,
+      center: ka
+    });
+    waypointMarker = new google.maps.Marker({
+      position: ka,
+      map: map
+    });
+    userMarker = new google.maps.Marker({
+        position: ka,
+        map: map,
+        icon: 'http://www.robotwoods.com/dev/misc/bluecircle.png'
+    });
 }

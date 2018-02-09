@@ -2,7 +2,11 @@ var VIB_SERVICE	       	= "713D0000-503E-4C75-BA94-3148F18D941E";
 var VIB_CHARACTERISTIC	= "713D0003-503E-4C75-BA94-3148F18D941E";
 
 var data = new Uint8Array(5);
+var pre_data = new Uint8Array(5);
 var vibrate = new Uint8Array(5);
+
+var bleList = [];
+var bleDevice;
 
 function createBLListElement(device) {
 	var li = document.createElement("li");
@@ -36,29 +40,13 @@ function bleVibrate() {
 	ble.isConnected(bleDevice.id, function() {
 		// connected, send vibration signals
 		prepareData(userGoDir);
-		
 		ble.writeWithoutResponse(bleDevice.id, VIB_SERVICE, VIB_CHARACTERISTIC, data.buffer, writeDone, writeFailure);
 	}, function() {
 		// not connected, do nothing
-		
 	});
 }
 
-function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
 
-// data[0] am ahorn, gegen uhrzeigersinn
-function updateDataBuffer() {
-	if (userGoDir <= 0)
-		return;
-	
-	data[0] = 0x00;
-	data[1] = 0xff;
-	data[2] = 0x00;
-	data[3] = 0x00;
-	data[4] = 0x00;
-	
-	// links ist 318, im Uhrzeigersinn nehmen die Zahlen zu, ab und zu minus!
-}
 
 function prepareData(dir) {
 	vibrate[0] = (dir > getBoundary(0, -1) || dir < getBoundary(0, 1)) ? 1 : 0;
@@ -89,9 +77,6 @@ function getBoundary(positionNumber, side) {
 	return (side == -1) ? mod(positionNumber * 72 - (2 / 3) * 72, 360) : mod(positionNumber * 72 + (2 / 3) * 72, 360);
 }
 
-function mod(a, b) {
-	return ((a%b)+b)%b;
-}
 
 //Callback when write is done.
 function writeDone() {
@@ -99,4 +84,57 @@ function writeDone() {
 
 // Callback when write fails.
 function writeFailure() {
+}
+
+function scanBluetooth() {
+	$('#ble-devices-list').empty();
+	bleList = [];
+	
+	ble.isEnabled(function success() {
+		ble.scan([], 5, function(device) {
+			device.compatible = isDeviceCompatible(device);
+			bleList.push(device);
+			
+			document.getElementById("ble-devices-list").appendChild(createBLListElement(device));
+			// $('#ble-devices-list').append(li);
+		}, false);
+	}, function failure() {
+		alert("Enable bluetooth!");
+	});
+}
+
+function handleBLConnect(clickedIndex) {
+	var select = $('#ble-devices-list').children()[clickedIndex];
+	
+	var conDevice = bleList[clickedIndex];
+	
+	ble.isConnected(conDevice.id, function success() {
+		// already connected, then disconnect...
+		ble.disconnect(conDevice.id, function success() {
+			// revoking style changes
+			select.removeChild(select.lastChild);
+		}, function failure() {
+			alert("Could not disconnect... Retry!");
+		})
+	}, function failure() {
+		// not connected, then connect to the device if its compatible!
+		ble.connect(conDevice.id, function success(device) {
+			// now connected to device, style changes to node
+			var connectedMessage = document.createElement("p");
+			connectedMessage.appendChild(document.createTextNode("CONNECTED!"));
+
+			select.appendChild(connectedMessage);
+			// TODO -> CONNECT TO DEVICE !!!
+			bleDevice = conDevice;
+		}, function failure() {
+			// connection failure
+			alert("Could not connect to device!");
+		})
+	});
+}
+
+function isDeviceCompatible(device) {
+	if (device.name)
+		return device.name.toUpperCase().indexOf("TECO WEARABLE") !== -1;
+	return false;
 }
