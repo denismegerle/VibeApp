@@ -67,6 +67,7 @@ function prepareData(dir) {
 }
 
 function getDistanceScale(distance) {
+	return 1.0;	// TODO remove...
 	if (distance < 0) return 1.0;
 	if (distance > 100) return 0.6;
 	

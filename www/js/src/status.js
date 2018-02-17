@@ -28,8 +28,9 @@ function geolocationStatus() {
 	if (!navigator) return false;
 	if (!navigator.geolocation) return false;
 	
-	navigator.geolocation.getCurrentPosition(function(pos) {stati.geolocation = true}, function(err) {stati.geolocation = false}, {timeout: 1000, enableHighAccuracy:true});
+	// navigator.geolocation.getCurrentPosition(function(pos) {stati.geolocation = true}, function(err) {stati.geolocation = false}, {timeout: 1000, enableHighAccuracy:true});
 	
+	stati.geolocation = true;
 	return stati.geolocation;
 }
 

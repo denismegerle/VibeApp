@@ -99,7 +99,7 @@ function onRouteButton() {
 		return;
 	}
 	
-	if (!stati.geolocation) {
+	if (!stati.geolocation || deviceLocation.latitude == "N/A") {
 		alert("Geolocation turned off or not precise enough. Your position is needed to calculate your path!");
 		return;
 	}
@@ -107,15 +107,15 @@ function onRouteButton() {
 	var input = String(document.getElementById("waypointInput").value);
 	var request = createDirectionsRequest(deviceLocation, parseInputToRequest(input));
 	
-	alert(request);	// TODO REMOVE, debug info
+	
 	
 	$.getJSON(request, function(data) {
-		if (!data || !data.route) return;
+		// if (!data || !data.route) return;
 		if (data.status == "NOT_FOUND" || data.status == "ZERO_RESULTS") {
 			alert("Route could not be found or zero results.");
 			return;
 		};
-		if (!data.routes[0] || !data.routes[0].legs[0]) return;
+		// if (!data.routes[0] || !data.routes[0].legs[0]) return;
 		
 		// just randomly picking the first available route for simplicity
 		gRouteLeg = data.routes[0].legs[0];
@@ -133,10 +133,6 @@ function onRouteButton() {
 		startNavIntervals();
 	});
 }
-
-
-
-
 
 // TODO next... -> if scan not possible then also dont hide the button...
 function onScanButton() {
