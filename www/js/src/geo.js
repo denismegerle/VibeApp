@@ -135,7 +135,7 @@ function createDirectionsRequest(deviceLocation, destination) {
 		outputFormat = "json?";
 		origin = "origin=" + deviceLocation.latitude + "," + deviceLocation.longitude,
 		destination = "destination=" + destination,
-		apikey = "key=" + "<DIRECTIONS_KEY>",
+		apikey = "key=" + "AIzaSyBsgaNK6czEQ-n3O0jLIPdcoy_8qsNGUhI",
 		optional = "mode=" + "walking";
 		parameters = origin + "&" + destination + "&" + apikey + "&" + optional;
 	
