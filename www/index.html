@@ -2,17 +2,6 @@
 <html>
 
 <head>
-<!--
-        Customize this policy to fit your own app's needs. For more guidance, see:
-            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
-        Some notes:
-            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-                * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
-<meta http-equiv="Content-Security-Policy"
-	content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
 
 <!-- Required meta tags-->
 <meta charset="utf-8">
@@ -31,13 +20,11 @@
 <link rel="stylesheet"
 	href="lib/framework7/css/framework7.material.colors.min.css">
 
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/index.css">
 
 <link rel="stylesheet" href="css/iconfont/material-icons.css">
-
-<script type="text/javascript" src="cordova.js"></script>
-<script type="text/javascript" src="lib/framework7/js/framework7.min.js"></script>
-<script type="text/javascript" src="js/my-app.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="css/jquery-1.5.0.mobile.min.css">
 </head>
 
 <body>
@@ -61,87 +48,138 @@
 				<!-- Page, "data-page" contains page name -->
 				<div data-page="index" class="page">
 					<!-- Scrollable page content -->
-					<div class="page-content">
-						<p>Page content goes here</p>
+					<p>Page content goes here</p>
 
-						<div class="tabs-animated-wrap">
-							<div class="tabs">
-                <!-- HOME page, showing status... -->
-								<div id="home" class="page-content tab tab-active">
-									<div class="content-block-title">Current Status</div>
-									<div class="list-block">
-										<ul>
-											<li class="item-content">
-												<div class="item-media">
-													<i class="icon material-icons md-only">wifi</i>
+					<div class="tabs-animated-wrap">
+						<div class="tabs">
+							<!-- HOME tab, showing status... -->
+							<div id="home-tab" class="page-content tab tab-active">
+								<div class="content-block-title">Current Status</div>
+								<div class="list-block">
+									<ul>
+										<li class="item-content">
+											<div class="item-media">
+												<i class="icon material-icons md-only">wifi</i>
+											</div>
+											<div class="item-inner">
+												<div class="item-title">Internet</div>
+												<div class="item-after">
+													<span id="statusmsg-internet">false</span>
 												</div>
+											</div>
+										</li>
+										<li class="item-content">
+											<div class="item-media">
+												<i class="icon material-icons md-only">bluetooth</i>
+											</div>
+											<div class="item-inner">
+												<div class="item-title">Bluetooth</div>
+												<div class="item-after">
+													<span id="statusmsg-bluetooth">false</span>
+												</div>
+											</div>
+										</li>
+										<li class="item-content">
+											<div class="item-media">
+												<i class="icon material-icons md-only">adjust</i>
+											</div>
+											<div class="item-inner">
+												<div class="item-title">Geolocation</div>
+												<div class="item-after">
+													<span id="statusmsg-geo">false</span>
+												</div>
+											</div>
+										</li>
+										<li class="item-content">
+											<div class="item-media">
+												<i class="icon material-icons md-only">streetview</i>
+											</div>
+											<div class="item-inner">
+												<div class="item-title">GMaps</div>
+												<div class="item-after">
+													<span id="statusmsg-map">false</span>
+												</div>
+											</div>
+										</li>
+										<li class="item-content">
+											<div class="item-media">
+												<i class="icon material-icons md-only">devices</i>
+											</div>
+											<div class="item-inner">
+												<div class="item-title">Wearable</div>
+												<div class="item-after">
+													<span id="statusmsg-connection">false</span>
+												</div>
+											</div>
+										</li>
+									</ul>
+									<div class="list-block-label">Showing status of dependent
+										services and devices.</div>
+								</div>
+								<button id="debugButton" onclick="debug()">DEBUG Button</button>
+							</div>
+
+							<!-- MAP tab, showing a gmaps and markers ... -->
+							<div id="map-tab" class="page-content tab">
+								<div id="gmap"></div>
+								<script async defer
+									src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCl8I_p4nwHLob5Urz1yVIwuvrU6jei1tQ&callback=initMap"></script>
+							</div>
+
+							<!-- COMPASS tab, compass and waypoints ... -->
+							<div id="compass-tab" class="page-content tab">
+								<div class="compass">
+									<div class="compassarrow"></div>
+									<div class="compassdiscbg">
+										<div id="waypointsign-circle" class="waypointsign-circle">
+											<div class="waypointsign"></div>
+										</div>
+										<div id="compassdisc" class="compassdisc">
+											<div id="north" class="north">N</div>
+											<div id="east" class="east">E</div>
+											<div id="south" class="south">S</div>
+											<div id="west" class="west">W</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="list-block accordion-list">
+									<ul>
+										<li class="accordion-item"><a href="#"
+											class="item-content item-link">
 												<div class="item-inner">
-													<div class="item-title">Item title</div>
-													<div class="item-after">Label</div>
+													<div class="item-title">
+														Next Waypoint: <span id="console-dest">N/A</span>
+													</div>
 												</div>
-											</li>
-											<li class="item-content">
-                        <div class="item-media">
-                          <i class="icon material-icons md-only">bluetooth</i>
-                        </div>
-                        <div class="item-inner">
-                          <div class="item-title">Item title</div>
-                          <div class="item-after">Label</div>
-                        </div>
-                      </li>
-                      <li class="item-content">
-                        <div class="item-media">
-                          <i class="icon material-icons md-only">adjust</i>
-                        </div>
-                        <div class="item-inner">
-                          <div class="item-title">Item title</div>
-                          <div class="item-after">Label</div>
-                        </div>
-                      </li>
-                      <li class="item-content">
-                        <div class="item-media">
-                          <i class="icon material-icons md-only">streetview</i>
-                        </div>
-                        <div class="item-inner">
-                          <div class="item-title">Item title</div>
-                          <div class="item-after">Label</div>
-                        </div>
-                      </li>
-                      <li class="item-content">
-                        <div class="item-media">
-                          <i class="icon material-icons md-only">devices</i>
-                        </div>
-                        <div class="item-inner">
-                          <div class="item-title">Item title</div>
-                          <div class="item-after">Label</div>
-                        </div>
-                      </li>
-										</ul>
-										<div class="list-block-label">Showing status of dependent services and devices.</div>
-									</div>
+										</a>
+											<div class="accordion-item-content">
+												<div class="content-block">
+													<p>
+														Coordinates: <span id="console-nextwpcoords">N/A</span>
+													</p>
+													<p>
+														Direction: <span id="console-nextwpdir">N/A</span>
+													</p>
+													<p>
+														Distance: <span id="console-nextwpdist">N/A</span>
+													</p>
+												</div>
+											</div></li>
+									</ul>
 								</div>
-								<div id="map" class="page-content tab">
-									<div class="block">
-										<p>Tab 2 content</p>
-										...
-									</div>
-								</div>
-								<div id="compass" class="page-content tab">
-									<div class="block">
-										<p>Tab 3 content</p>
-										...
-									</div>
-								</div>
-								<div id="connect" class="page-content tab">
-									<div class="block">
-										<p>Tab 3 content</p>
-										...
-									</div>
+								
+								<!-- TODO: right here, add a small textbox to retrieve data from and two buttons afterwards!! -->
+							</div>
+							<div id="connect-tab" class="page-content tab">
+								<div class="block">
+									<p>Tab 3 content</p>
+									...
 								</div>
 							</div>
 						</div>
-
 					</div>
+
 				</div>
 			</div>
 
@@ -149,16 +187,16 @@
 			<!-- Bottom Toolbar-->
 			<div class="toolbar tabbar tabbar-labels toolbar-bottom">
 				<div class="toolbar-inner">
-					<a href="#home" class="tab-link tab-link-active"> <i
+					<a href="#home-tab" class="tab-link tab-link-active"> <i
 						class="icon material-icons md-only">home</i> <span
 						class="tabbar-label">Home</span>
-					</a> <a href="#map" class="tab-link"> <i
+					</a> <a href="#map-tab" class="tab-link"> <i
 						class="icon material-icons md-only">streetview</i> <span
 						class="tabbar-label">Map</span>
-					</a> <a href="#compass" class="tab-link"> <i
+					</a> <a href="#compass-tab" class="tab-link"> <i
 						class="icon material-icons md-only">navigation</i> <span
 						class="tabbar-label">Compass</span>
-					</a> <a href="#connect" class="tab-link"> <i
+					</a> <a href="#connect-tab" class="tab-link"> <i
 						class="icon material-icons md-only">bluetooth</i> <span
 						class="tabbar-label">TECO</span>
 					</a>
@@ -166,127 +204,29 @@
 			</div>
 		</div>
 	</div>
+
+	<script type="text/javascript" src="cordova.js"></script>
+	<script type="text/javascript"
+		src="lib/framework7/js/framework7.min.js"></script>
+	<script type="text/javascript" src="js/my-app.js"></script>
 </body>
 
 </html>
 
 <!--
 <head>
-    <meta charset="utf-8">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="msapplication-tap-highlight" content="no">
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
     <meta http-equiv="Content-Security-Policy" content="default-src * &apos;unsafe-inline&apos;; style-src &apos;self&apos; &apos;unsafe-inline&apos;; media-src *">
 
-    <link rel="stylesheet" type="text/css" href="css/index.css">
-	<link rel="stylesheet" type="text/css" href="css/jquery-1.5.0.mobile.min.css">
-	<style>
-		/* For avoiding title truncation in wp8 */
-		.ui-header .ui-title {
-				overflow: visible !important;
-		}
-		/* For fixing the absolute position issue for the default cordova gen page*/
-		#cjp-accordion1 .app {
-				left: 5px !important;
-				margin: 5px !important;
-				position: relative !important;
-		}
-	</style>
-	
-	<script type="text/javascript" src="cordova.js"></script>
+
 	<script type="text/javascript" src="js/jquery-1.11.1.min.js" id="cordova-jquery"></script>
-	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCl8I_p4nwHLob5Urz1yVIwuvrU6jei1tQ&callback=initMap"></script>
-	<script type="text/javascript" id="jqm-trans-disable">
-		/* For having a faster transition */
-		$(document).on("mobileinit", function() {
-				$.mobile.defaultPageTransition = "none";
-				$.mobile.defaultDialogTransition = "none";
-		});
+
 		</script><script type="text/javascript" src="js/jquery-1.5.0.mobile.min.js"></script>
-		<script type="text/javascript" src="js/main.js"></script><script type="text/javascript">
-        app.initialize();
-    </script>
-    <script id="paneljs">
-		$(function() {
-			try{$( "body>[data-role=\'panel\']" ).panel();}catch(e){}
-		});
-    </script>
-    
-    <title>Vibe</title>
+
 </head>
 
 <body>
-	********** HOME  PAGE! **********
-	<div id="home-page" data-url="home-page" data-role="page" data-theme="a" class="background-content">
-    	<div data-role="header" data-theme="b" data-position="fixed">
-        	<h1>Welcome to Vibe!</h1>
-        	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false"></a>
-    	</div>
-    	
-    	<div data-role="content" data-position="fixed" class="home-stati">
-        <div id="status-internet" class="statusmsg">
-          <h3>Internet</h3>
-          <h4><span id="statusmsg-internet">false</span></h4>
-        </div>
-        
-        <div id="status-bluetooth" class="statusmsg">
-          <h3>Bluetooth</h3>
-          <h4><span id="statusmsg-bluetooth">false</span></h4>
-        </div>
-        
-        <div id="status-geo" class="statusmsg">
-          <h3>Geolocation</h3>
-          <h4><span id="statusmsg-geo">false</span></h4>
-        </div>
-        
-        <div id="status-map" class="statusmsg">
-          <h3>Kartenstatus</h3>
-          <h4><span id="statusmsg-map">false</span></h4>
-        </div>
-		    
-		    <div id="status-connection" class="statusmsg">
-          <h3>BLE-Status</h3>
-          <h4><span id="statusmsg-connection">false</span></h4>
-        </div>
-        
-		<button id="debugButton" onclick="debug()">DEBUG Button</button>
-		
-    	</div>
-    </div>
-	*********************************
-	
-	********** MAP   PAGE! **********
-	<div id="map-page" data-url="map-page" data-role="page" data-theme="a" class="background-content">
-    	<div data-role="header" data-theme="a" data-position="fixed">
-        	<h1>Map</h1>
-        	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false"></a>
-    	</div>
-    	
-    	<div id="map"></div>
-		
-    </div>
-	*********************************
-	
 	********** COMP  PAGE! **********
-	<div id="comp-page" data-url="comp-page" data-role="page" data-theme="a" class="background-content">
-    	<div data-role="header" data-theme="b" data-position="fixed">
-        	<h1>Compass</h1>
-        	<a class="ui-icon-nodisc" href="#left-panel" data-iconpos="notext" data-icon="arrow-r" data-theme="d" data-iconshadow="false" data-shadow="false">Open left panel</a>
-    	</div>
-    	
-    	<div class="compass">
-    		<div class="compassarrow"></div>
-    		<div class="compassdiscbg">
-    		<div id="waypointsign-circle" class="waypointsign-circle"><div class="waypointsign"></div></div>
-    			<div id="compassdisc" class="compassdisc">
-    				<div id="north" class="north">N</div>
-    				<div id="east" class="east">E</div>
-    				<div id="south" class="south">S</div>
-    				<div id="west" class="west">W</div>
-    			</div>
-    		</div>
-    	</div>
-    	
+	<div id="comp-page" data-url="comp-page" data-role="page" data-theme="a" class="background-content">	    	
     	<div class="waypoint-data">
     		<div class="console-data">
     			<div><span class="console-info">[Destination]</span><span id="console-dest" class="console-info-content">N/A</span></div>
